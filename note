@@ -1,0 +1,5 @@
+movilen
+
+*content-based
+- xây dựng vector feature cho item dựa vào đánh dấu thể loại của phim
+- mỗi user tìm một mô hình : X là vector feature của mỗi bộ phim, y là rate của user cho bộ phim đó 
