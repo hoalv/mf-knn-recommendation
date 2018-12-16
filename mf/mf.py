@@ -177,6 +177,8 @@ class MF(object):
         SE = 0 # squared error
         for n in range(n_tests):
             pred = self.pred(rate_test[n, 0], rate_test[n, 1])
+            # print("pred: ", pred)
+            # print("real: ", rate_test[n, 2])
             SE += (pred - rate_test[n, 2])**2 
 
         RMSE = np.sqrt(SE/n_tests)

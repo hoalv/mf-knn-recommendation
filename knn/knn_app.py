@@ -33,17 +33,19 @@ user_new = np.array([53, 0, 13]).reshape(1, users_train.shape[1])
 in_file = open("MF.obj", "rb") # opening for [r]eading as [b]inary
 mf = pickle.load(in_file) # if you only wanted to read 512 bytes, do .read(512)
 in_file.close()
+print("users_train:\n", users_train.shape)
+print("W:\n", mf.W.T.shape)
 print("x:\n", mf.X.dot(mf.W))
 print("xxx:\n",mf.Y_data_n)
 # print("W: \n",mf.W.T[nearest_ids])
 
-rs = KNN(users = users, n_users = n_users, users_train = users_train, user_new = user_new, k=5, mf = mf)
+# rs = KNN(users = users, n_users = n_users, users_train = users_train, user_new = user_new, k=5, mf = mf)
 
-rs.fit()
+# rs.fit()
 
-rs.pred()
+# rs.pred()
 
-rate_train = rs.mf.Y_data_n[rs.mf.Y_data_n[:, 0]==1]
-best_rate_ids = np.argsort(rate_train[:, 2])[-10:]
+# rate_train = rs.mf.Y_data_n[rs.mf.Y_data_n[:, 0]==1]
+# best_rate_ids = np.argsort(rate_train[:, 2])[-10:]
 # print("rate_train:\n",  rate_train[best_rate_ids, 1])
 # print("rate_train:\n",  rate_train)
