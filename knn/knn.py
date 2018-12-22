@@ -27,7 +27,7 @@ class KNN(object):
 
 	def similarity(self):
 		self.S = self.dist_func(self.user_new, self.users_train)
-		print("S:\n", self.S)
+		# print("S:\n", self.S)
 
 	def refresh(self):
 		"""
