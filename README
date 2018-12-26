@@ -19,9 +19,9 @@ sudo apt-get install python3-pandas
 * dataset : chứa dữ liệu MoviLen 100k dùng để thử nghiệm thuật toán 
 * thư mục mf: 
 mf.py : chứa code phương pháp phân rã ma trận, chứa các hàm dự đoán rating của user cho item
-mf_main.py: chạy để trainning mf, write mô hình thu được vào file
+mf_main.py: chạy để trainning mf, write mô hình thu được vào file MF.object
 * thư mục knn
 knn.py: chứa code thuật toán knn, chứa các hàm dự đoán rating của user cho item
-knn_evaluation.py: chạy đề đánh giá thuật toán chính được đề xuất trong ĐATN (mô hình mf (đã được training từ trước) được load lên từ file để sử dụng)
+knn_evaluation.py: chạy đề đánh giá thuật toán chính được đề xuất trong ĐATN (mô hình mf (đã được training từ trước) được load lên từ file MF.object để sử dụng)
 
 3. Chạy file bằng câu lệnh: python3 {filename}.py 
