@@ -12,21 +12,25 @@ class KNN(object):
 		self.users = users
 		self.n_users = n_users
 		self.all_users = all_users
-		self.users_train = users_train	
+		self.users_train = users_train[:, 1:4]	
 		self.user_new = user_new
-
+		self.users_train_raw = users_train
 		# reshape(1, self.all_users.shape[1])
 		self.k = k
 		self.mf = mf
 		self.dist_func = dist_func
 		self.SE = 0
 
-		self.ratings_avg = np.mean(self.mf.Y_data_n[:, 2])
+		# self.ratings_avg = np.mean(self.mf.Y_data_n[:, 2])
 		self.total_rating_rmse = 0
 		self.SE_average = 0
 		self.total_rating_rmse_average = 0
 		self.SE_global = 0
 		self.total_rating_rmse_global = 0
+
+		users_train_list = users_train[:, 0].tolist()
+		user_ids = np.where(self.mf.Y_data_n[:, 0] == i-1 for i in users_train_list)[0]
+		self.ratings_avg =  np.mean(self.mf.Y_data_n[user_ids, 2])
 	
 	def nomarlize_users(self):
 		self.user_new = (self.user_new - np.min(self.all_users, axis=0))/np.ptp(self.all_users, axis = 0)
@@ -62,10 +66,18 @@ class KNN(object):
 		feature_user_new = (tich.sum(axis=0))/(np.abs(nearest_s).sum())
 		return feature_user_new
     
-	def pred(self, mf_k , features_train, user_index):
-		feature_user_new = self.__caculate_feature_user_new(features_train, user_index)
-		# print("pred f:\n", feature_user_new)
-		return self.mf.X.dot(feature_user_new.T)
+	def pred(self, mf_k , features_train, user_index, user_id):
+		# print("self.users_train_raw[0]: ", self.users_train_raw[:, 0])
+		# print("user_id: ", user_id)
+		if (user_id in self.users_train_raw[: , 0]):
+			print("old user")
+			id_in_users_train = np.where(self.users_train_raw[:, 0] == user_id)
+			u_w = self.mf.W.T[id_in_users_train]
+			return self.mf.X.dot(u_w.T)
+		else:
+			print("new user")
+			feature_user_new = self.__caculate_feature_user_new(features_train, user_index)
+			return self.mf.X.dot(feature_user_new.T)
 		# feature_user_new = np.reshape(feature_user_new, (mf_k,1))
 		# rate_pred = self.mf.X.dot(feature_user_new) 
 		# print("rating:\n",rate_pred)
@@ -75,12 +87,12 @@ class KNN(object):
 	# Đánh giá kết quả bằng cách đo Root Mean Square Error:
 	def evaluate_RMSE(self, features_train, features_test, user_index, user_id):
 		feature_user_new = self.__caculate_feature_user_new(features_train, user_index)
-		pred_rating = self.pred(mf_k = 100, features_train = features_train, user_index =user_index)
+		pred_rating = self.pred(mf_k = 100, features_train = features_train, user_index =user_index, user_id = user_id)
 		# feature_user_new = np.reshape(feature_user_new, (mf_k,1))
 		n_tests = features_test.shape[0]
     	 # squared error
 		# self.SE += distance.euclidean(feature_user_new, features_test[user_index])**2
-		ids = np.where(self.mf.Y_data_n[:, 0] == user_id)[0]
+		ids = np.where(self.mf.Y_data_n[:, 0] == user_id-1)[0]
 		real_rating_of_u = self.mf.Y_data_n[ids, 2]
 		item_ids = self.mf.Y_data_n[ids, 1]
 		for i in range(real_rating_of_u.shape[0]):
@@ -99,7 +111,7 @@ class KNN(object):
 		# n_tests = features_test.shape[0]
     	 # squared error
 		# self.SE += distance.euclidean(feature_user_new, features_test[user_index])**2
-		ids = np.where(self.mf.Y_data_n[:, 0] == user_id)[0]
+		ids = np.where(self.mf.Y_data_n[:, 0] == user_id-1)[0]
 		real_rating_of_u = self.mf.Y_data_n[ids, 2]
 		item_ids = self.mf.Y_data_n[ids, 1]
 		for i in range(real_rating_of_u.shape[0]):
@@ -109,13 +121,17 @@ class KNN(object):
 			self.total_rating_rmse_average += 1
 
 	# Đánh giá kết quả bằng cách đo Root Mean Square Error:
-	def global_average_evaluate_RMSE(self, features_train, features_test, user_index, user_id):
+	def global_average_evaluate_RMSE(self, users_train, user_index, user_id):
 		# feature_user_new = self.__caculate_feature_user_new(features_train, user_index)
 		# pred_rating = self.pred(mf_k = 100, features_train = features_train, user_index =user_index)
 		# # feature_user_new = np.reshape(feature_user_new, (mf_k,1))
 		# n_tests = features_test.shape[0]
     	 # squared error
 		# self.SE += distance.euclidean(feature_user_new, features_test[user_index])**2
+		
+		users_train_list = users_train[:, 0].tolist()
+		user_ids = np.where(self.mf.Y_data_n[:, 0] == i-1 for i in users_train_list)[0]
+		self.ratings_avg =  np.mean(self.mf.Y_data_n[user_ids, 2])
 		ids = np.where(self.mf.Y_data_n[:, 0] == user_id)[0]
 		real_rating_of_u = self.mf.Y_data_n[ids, 2]
 		for i in range(real_rating_of_u.shape[0]):

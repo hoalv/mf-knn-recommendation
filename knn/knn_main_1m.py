@@ -10,6 +10,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 import os
+import time
+
+start_time = time.time()
 
 MOVIELENS_DIR = '../dataset/ml-1m'
 USER_DATA_FILE = 'users.dat'
@@ -39,7 +42,7 @@ in_file.close()
 print("x:\n", mf.X.dot(mf.W).shape)
 print("xxx:\n",mf.Y_data_n.shape)
 
-users_train, users_test, f_train, f_test = train_test_split(all_users, mf.W.T, test_size=0.25)
+users_train, users_test, f_train, f_test = train_test_split(all_users, mf.W.T, test_size=0.9)
 
 # split tranning set to validation
 users_train_v, users_validate, f_train_v, f_validate = train_test_split(users_train, f_train, test_size=0.3)
@@ -47,17 +50,18 @@ users_train_v, users_validate, f_train_v, f_validate = train_test_split(users_tr
 print("users_train:\n", users_train.shape)
 print("W:\n", f_train.shape)
 
-rs = KNN(users = users, n_users = n_users, all_users = all_users[:, 1:4], users_train = users_train[:, 1:4], user_new = users_test[:, 1:4], k=50, mf = mf)
+rs = KNN(users = users, n_users = n_users, all_users = all_users[:, 1:4], users_train = users_train[:, :4], user_new = users_test[:, 1:4], k=50, mf = mf)
 
 rs.fit()
 
+print("--- %s seconds ---" % (time.time() - start_time))
 
 for ii in range(users_test.shape[0]):
 	# rs.pred(mf_k = 10, features_train = f_train, user_index =ii)
 	# print("real f:\n", f_test[ii])
 	rs.evaluate_RMSE(features_train=f_train, features_test=f_test, user_index=ii, user_id=users_test[ii][0])
 	rs.item_average_evaluate_RMSE(features_train=f_train, features_test=f_test, user_index=ii, user_id=users_test[ii][0])
-	rs.global_average_evaluate_RMSE(features_train=f_train, features_test=f_test, user_index=ii, user_id=users_test[ii][0])
+	rs.global_average_evaluate_RMSE(users_train = users_train[:, :4], user_index=ii, user_id=users_test[ii][0])
 
 RMSE = np.sqrt(rs.SE/rs.total_rating_rmse)
 print("RMSE: ", RMSE)

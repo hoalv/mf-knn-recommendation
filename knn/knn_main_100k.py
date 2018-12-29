@@ -9,6 +9,10 @@ import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
+import time
+
+
+start_time = time.time()
 
 u_cols =  ['user_id', 'age', 'sex', 'occupation', 'zip_code']
 users = pd.read_csv('../dataset/ml-100k/u.user', sep='|', names=u_cols,
@@ -38,10 +42,14 @@ in_file.close()
 print("x:\n", mf.X.dot(mf.W).shape)
 print("xxx:\n",mf.Y_data_n.shape)
 
-users_train, users_test, f_train, f_test = train_test_split(all_users, mf.W.T, test_size=0.25)
+# users_train, users_test, f_train, f_test = train_test_split(all_users, mf.W.T, test_size=0.25)
+users_train = all_users[:800]
+users_test = all_users[600:]
+f_train = mf.W.T[:800]
+f_test = mf.W.T[600:]
 
-print("users_train:\n", users_train.shape)
-print("W:\n", f_train.shape)
+print("all_users:\n", all_users.shape)
+print("W:\n", mf.W.T.shape)
 
 
 # split tranning set to validation
@@ -77,10 +85,12 @@ print("W:\n", f_train.shape)
 
 # print([i/10 for i in rmse])
 # 
- 
-rs = KNN(users = users, n_users = n_users, all_users = all_users[:, 1:4], users_train = users_train[:, 1:4], user_new = users_test[:, 1:4], k=50, mf = mf)
+
+rs = KNN(users = users, n_users = n_users, all_users = all_users[:, 1:4], users_train = users_train[:, :4], user_new = users_test[:, 1:4], k=50, mf = mf)
 
 rs.fit()
+
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
 for ii in range(users_test.shape[0]):
@@ -88,7 +98,7 @@ for ii in range(users_test.shape[0]):
 	# print("real f:\n", f_test[ii])
 	rs.evaluate_RMSE(features_train=f_train, features_test=f_test, user_index=ii, user_id=users_test[ii][0])
 	rs.item_average_evaluate_RMSE(features_train=f_train, features_test=f_test, user_index=ii, user_id=users_test[ii][0])
-	rs.global_average_evaluate_RMSE(features_train=f_train, features_test=f_test, user_index=ii, user_id=users_test[ii][0])
+	rs.global_average_evaluate_RMSE(users_train = users_train[:, :4], user_index=ii, user_id=users_test[ii][0])
 
 
 RMSE = np.sqrt(rs.SE/rs.total_rating_rmse)
